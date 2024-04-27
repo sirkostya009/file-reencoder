@@ -1,33 +1,91 @@
 <head>
     <meta charset="UTF-8">
-    <title>test</title>
+    <title>Файловий Перекодувач</title>
     <link rel="stylesheet" href="stylesheet.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
-<body class="bg-red-100 flex flex-col">
+<body class="bg-slate-200 flex flex-col">
 
-<section class="w-full h-6 bg-gray-600 flex flex-row items-center">
-    <button>File</button>
-    <button>View</button>
-    <button>Settings</button>
+<section class="bg-slate-300 w-full h-6 flex flex-row items-center">
+    <button id="fileButton" class="hover:bg-blue-200 px-1.5" onclick="fileDropdown.classList.toggle('hidden')">Файл</button>
+
+    <div id="fileDropdown" class="absolute top-6 bg-[#fff] z-10 h-auto w-[140px] hidden">
+        <button class="bg-slate-100 hover:bg-blue-200 px-1.5 w-full text-left" onclick="openWrap()">Відкрити файл</button>
+        <button class="bg-slate-100 hover:bg-blue-200 px-1.5 w-full text-left" onclick="saveAsFile(encodingSelect.value, fileContents.value)">Зберігти файл</button>
+        <button class="bg-slate-100 hover:bg-blue-200 px-1.5 w-full text-left" onclick="fileContents.value = ''">Закрити файл</button>
+        <button class="bg-slate-100 hover:bg-blue-200 px-1.5 w-full text-left" onclick="nuke()">Вийти</button>
+    </div>
+
+    <button class="hover:bg-blue-200 px-1.5" onclick="openInfo()">Про застосунок</button>
 </section>
 
-<section class="w-full bg-blue-100">
-    <button>Run</button>
+<section class="w-full">
+    <button onclick="openWrap()">
+        <svg class="text-gray-500 hover:text-gray-800 transition-color duration-300 mb-[1px]" xmlns="http://www.w3.org/2000/svg" width="40" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+            <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+            <path d="M9 15h6"/>
+            <path d="M12 18v-6"/>
+        </svg>
+    </button>
+
+    <button onclick="saveAsFile(encodingSelect.value, fileContents.value)">
+        <svg class="text-gray-500 hover:text-gray-800 transition-color duration-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="44" height="44" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M11 16h2m6.707-9.293-2.414-2.414A1 1 0 0 0 16.586 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7.414a1 1 0 0 0-.293-.707ZM16 20v-6a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v6h8ZM9 4h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V4Z"/>
+        </svg>
+    </button>
+
+    <button onclick="fileContents.value = ''">
+        <svg class="text-gray-500 hover:text-gray-800 transition-color duration-300" width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6.2253 4.81108C5.83477 4.42056 5.20161 4.42056 4.81108 4.81108C4.42056 5.20161 4.42056 5.83477 4.81108 6.2253L10.5858 12L4.81114 17.7747C4.42062 18.1652 4.42062 18.7984 4.81114 19.1889C5.20167 19.5794 5.83483 19.5794 6.22535 19.1889L12 13.4142L17.7747 19.1889C18.1652 19.5794 18.7984 19.5794 19.1889 19.1889C19.5794 18.7984 19.5794 18.1652 19.1889 17.7747L13.4142 12L19.189 6.2253C19.5795 5.83477 19.5795 5.20161 19.189 4.81108C18.7985 4.42056 18.1653 4.42056 17.7748 4.81108L12 10.5858L6.2253 4.81108Z" fill="currentColor" />
+        </svg>
+    </button>
 </section>
 
-<main class="flex-1 grid grid-cols-2 bg-purple-100">
-    <textarea id="originalFile" class="w-full flex-1"></textarea>
+<main class="flex-1 w-full flex flex-col items-center">
+    <select id="encodingSelect" class="bg-transparent focus:select-none appearance-none w-[52%] max-w-[800px]">
+        <option value="utf8">UTF-8</option>
+        <option value="utf16">UTF-16</option>
+        <option value="utf32">UTF-32</option>
+        <option value="bin">Binary</option>
+    </select>
 
-    <textarea id="terminal" class="w-full flex-1"></textarea>
+    <textarea id="fileContents" class="flex-1 w-[90%] max-w-[1000px]"></textarea>
 </main>
 
-<section class="bg-black text-white">
-    <p id="status">Ready</p>
+<section class="bg-slate-300 text-black">
+    <p id="status">Статус барчик</p>
 </section>
 
 </body>
 
 <script>
+    addEventListener('click', (e) => e.target.id !== 'fileButton' && fileDropdown.classList.add('hidden'));
+
+    function openWrap() {
+        const so = openFile();
+        if (typeof so === 'string') {
+            fileContents.value = so;
+        }
+    }
+
+    addEventListener('keydown', (e) => {
+        if (e.ctrlKey) {
+            switch (e.key) {
+            case 'o':
+                openWrap();
+                break;
+            case 's':
+                saveAsFile(encodingSelect.value, fileContents.value);
+                break;
+            case 'l':
+                fileContents.value = '';
+                break;
+            case 'q':
+                nuke();
+                break;
+            }
+        }
+    });
 </script>
